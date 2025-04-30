@@ -104,6 +104,14 @@ body{
 	transform: rotateY(0deg); /*slika mora da se pokaze*/
 }
 
+#game-info{
+	border: 1px solid blue;
+	background-color: #f2f2f2;
+	border-radius: 10px;
+	padding: 25px;
+	margin-right: 50px;
+}
+
 
 
 

@@ -5,9 +5,63 @@ let matchedCard = 0;
 let cardOne, cardTwo;
 let disableDeck = false; //we need to prevent the user from clicking on the other cards until the first two cards unflip
 
+//promenljive za tajmer
+let timeLeft = 60; // postavljamo koliko sekundi korisnik ima da zavrsi igru (npr.45)
+let timerInterval = null;
+
+
+function startTimer() {
+	const timerDisplay = document.getElementById("timer");
+	timerInterval = setInterval(() => {
+		timeLeft--;
+		timerDisplay.textContent = timeLeft;
+		if (timeLeft <= 0){
+			clearInterval(timerInterval); //prekidamo brojanje
+			endGame(false); // pozivamo funkciju
+		}
+	}, 1000); //na svakih 1s se desava ova f-ja
+
+}
+
+function endGame(win) {
+	const message = document.getElementById("game-message");
+
+	if (win) {
+        message.textContent = "🎉 You win!";
+    } else {
+        message.textContent = "😢 You lost!";
+        setTimeout(() => {
+            resetGame(); //resetuj igru 5 sekundi nakon poraza
+        }, 5000);
+    }
+
+    disableDeck = true;
+}
+
+// funkcija za resetovanje tajmera i igre
+function resetGame(){
+	clearInterval(timerInterval); // zaustavljamo prethodni tajmer
+	timeLeft = 60;
+	document.getElementById("timer").textContent = timeLeft; //azuriranje prikaza vremena
+	timerInterval = null;
+
+	disableDeck = false;
+	document.getElementById("game-message").textContent = ""; // ciscenje poruke
+
+	matchedCard = 0;
+
+	shuffleCards(); // nakon sto resetujemo tajmer pozivamo funkciju koja mesa karte
+}
+
+
 
 function flipCard(e){
 	let clickedCard = e.target; //getting user clicked card
+
+	 if (!timerInterval) {
+        startTimer(); // pokrećemo tajmer se samo jednom
+    }
+
 	if(clickedCard != cardOne && !disableDeck){
 		clickedCard.classList.add("flip");
 
@@ -30,9 +84,13 @@ function matchCards(img1, img2){
 	if (img1 === img2){ // if two cards img matched
 		matchedCard++; // povecavamo ovu promenljvu svaki put kad mecujemo karte
 		if (matchedCard == 8) { //if matched value is 8b that means that user has matched all the cards, 8 * 2 = 16
+			
+			clearInterval(timerInterval); // zaustavljamo tajmer
+            endGame(true); // korisnik je uspešno završio igru
+
 			setTimeout(() =>{
-				return suffleCard(); // f-ju pozivamo posle 1 sekunde
-			}, 1000); // kada se dodje do kraja pozivamo ovu f-ju, a naredni kd ne zelimo da izvrsimo zato stavljamo return
+				return resetGame(); // f-ju pozivamo posle 5 sekundi
+			}, 5000); // kada se dodje do kraja pozivamo ovu f-ju, a naredni kd ne zelimo da izvrsimo zato stavljamo return
 		}
 		cardOne.removeEventListener("click", flipCard);
 		cardTwo.removeEventListener("click", flipCard);
@@ -59,7 +117,7 @@ function matchCards(img1, img2){
 
 }
 
-function suffleCard(){
+function shuffleCards(){
 	matchedCard = 0;
 	cardOne = cardTwo = "";
 	disableDeck = false;
@@ -75,11 +133,11 @@ function suffleCard(){
 	})
 }
 
-suffleCard();
+shuffleCards();
 
 cards.forEach(card => { //adding click event to all cards
 	card.addEventListener("click", flipCard);
 });
 
-// suffleCard() will be called two times, when user refresh browser, and when user mathes all the cards
+// shuffleCards() will be called two times, when user refresh browser, and when user mathes all the cards
 
